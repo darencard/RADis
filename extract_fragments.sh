@@ -83,11 +83,15 @@ then
 	exit 1
 fi
 
+RENZ=$(echo $RARE | rev | cut -d "_" -f 3 | rev)
+CENZ=$(echo $COMMON | rev | cut -d "_" -f 3 | rev)
+
 # Find closest common cut site to each rare cut site using the respective BED files and format output into BED output
-bedtools closest -g $GENOME.genomes -s -io -D a -t first -iu -fd -a $RARE -b $COMMON | \
-grep -v "\-1" | awk '{if ($13 >= LOWER && $13 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
-awk '{if ($6 == "+") print $1 "\t" $2 "\t" $8 "\t" $4 "-" $10 "\t" $13 "\t" $6; \
-else print $1 "\t" $8 "\t" $2 "\t" $4 "-" $10 "\t" $13 "\t" $6}' - \
+bedtools closest -g $GENOME.genomes -s -io -D a -t first -iu -fd -a $RARE -b $COMMON $RARE | \
+grep -v "\-1" | awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
+awk '{if ($6 == "+") print $1 "\t" $2 "\t" $9 "\t" $4 "-" $11 "\t" $14 "\t" $6; \
+else print $1 "\t" $9 "\t" $2 "\t" $4 "-" $11 "\t" $14 "\t" $6}' - | \
+grep -v "$RENZ-$RENZ" - \
  > $OUTPUT.bed
 
 # Use BED output from above and extract the fragment sequences in fasta format
