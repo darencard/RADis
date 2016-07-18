@@ -94,9 +94,10 @@ def digest(enzyme, sequence, outfile):
 	
 	# for each of the items in results 'matches' list from 2nd item on (first item is match string)
 	for match in matches[1:]:
-		# create line for match on query stand and also for reverse complement on alternate strand
+		# create line for match on query stand
 		line1 = sequence.id+"\t"+str(int(match)+int(enzyme[2]))+"\t"+str(int(match)+int(enzyme[2]))+"\t"+enzyme[0]+"\t.\t+\n"
-		line2 = sequence.id+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+enzyme[0]+"\t.\t-\n"
+		# look for reverse complement - ignore... my thinking was muddled for a bit
+		#line2 = sequence.id+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+enzyme[0]+"\t.\t-\n"
 
 		# if cut site is past halfway point in enzyme, we should output antisense cut first to keep output BED sorted
 		if len(enzyme[1])/2 < int(enzyme[2]):
