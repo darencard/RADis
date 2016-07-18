@@ -100,12 +100,14 @@ def digest(enzyme, sequence, outfile):
 		#line2 = sequence.id+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+enzyme[0]+"\t.\t-\n"
 
 		# if cut site is past halfway point in enzyme, we should output antisense cut first to keep output BED sorted
-		if len(enzyme[1])/2 < int(enzyme[2]):
-			outfile.write(line2+line1)
+		#if len(enzyme[1])/2 < int(enzyme[2]):
+			#outfile.write(line2+line1)
 		# if cut site is not past halfway point in enzyme, we can output in logical order
-		else:
+		#else:
 			# write both lines to ouput
-			outfile.write(line1+line2)
+			#outfile.write(line1+line2)
+		
+		outfile.write(line1)
 
 
 
