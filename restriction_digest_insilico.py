@@ -125,7 +125,7 @@ def main():
 	
 	# for each enzyme in enzyme list and for each sequence, run digest function
 	for enzyme in enzyme_list:
-		sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").")
+		sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
 		# file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
 		output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
 		for sequence in SeqIO.parse(open(options.input), "fasta"):
