@@ -87,12 +87,24 @@ RENZ=$(echo $RARE | rev | cut -d "_" -f 3 | rev)
 CENZ=$(echo $COMMON | rev | cut -d "_" -f 3 | rev)
 
 # Find closest common cut site to each rare cut site using the respective BED files and format output into BED output
-bedtools closest -s -io -D a -t first -iu -fd -a $RARE -b $COMMON $RARE | \
-grep -v "\-1" | awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
-awk '{if ($6 == "+") print $1 "\t" $2 "\t" $9 "\t" $4 "-" $11 "\t" $14 "\t" $6; \
-else print $1 "\t" $9 "\t" $2 "\t" $4 "-" $11 "\t" $14 "\t" $6}' - | \
-grep -v "$RENZ-$RENZ" - \
- > $OUTPUT.bed
+cat \
+<(bedtools closest -io -D a -t first -fd -mdb all -filenames -g <(cat $GENOME | awk '$0 ~ ">" {print c; c=0;printf substr($1,2,300) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }') -a $RARE -b $RARE $COMMON | \
+awk '{ if ($7 != ".") print $0 }' | \
+awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
+awk -v OFS="\t" '{ if ($4 != $11) print $1,$2,$9,$4"-"$11,$14,"+" }') \
+<(bedtools closest -io -D a -t first -fu -mdb all -filenames -g <(cat $GENOME | awk '$0 ~ ">" {print c; c=0;printf substr($1,2,300) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }') -a $RARE -b $RARE $COMMON | \
+awk '{ if ($7 != ".") print $0 }' | \
+awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
+awk -v OFS="\t" '{ if ($4 != $11) print $1,$2,$9,$4"-"$11,$14,"-" }') | \
+sort_lh3 -k1,1N -k2,2n \
+> $OUTPUT.bed
+
+#bedtools closest -s -io -D a -t first -iu -fd -a $RARE -b $COMMON $RARE | \
+#grep -v "\-1" | awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
+#awk '{if ($6 == "+") print $1 "\t" $2 "\t" $9 "\t" $4 "-" $11 "\t" $14 "\t" $6; \
+#else print $1 "\t" $9 "\t" $2 "\t" $4 "-" $11 "\t" $14 "\t" $6}' - | \
+#grep -v "$RENZ-$RENZ" - \
+# > $OUTPUT.bed
 
 # Use BED output from above and extract the fragment sequences in fasta format
 bedtools getfasta -s -fi $GENOME -bed $OUTPUT.bed -fo $OUTPUT.fasta
