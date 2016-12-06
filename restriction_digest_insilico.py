@@ -5,6 +5,7 @@
 from __future__ import division
 import optparse
 import sys
+from multiprocessing import Process
 from Bio import SeqIO
 from Bio import SeqUtils
 
@@ -111,6 +112,16 @@ def digest(enzyme, sequence, outfile):
 		outfile.write(line1)
 
 
+##############################################################
+###         Split Enzyme List for Parallelization          ###
+##############################################################
+
+def split_list(alist, wanted_parts=1):
+    length = len(alist)
+    return [ alist[i*length // wanted_parts: (i+1)*length // wanted_parts] 
+             for i in range(wanted_parts) ]
+
+
 
 ##############################################################
 ### 			Main Program		  	   ###
@@ -122,15 +133,60 @@ def main():
 	
 	# parse restriction enzyme list using function
 	enzyme_list = parse_RE_list(RE_list, options.enzymes)
-	
+
+	batch_list = split_list(enzyme_list, wanted_parts=4)
+
+	sys.stderr.write("Using target sequences from "+options.input+".\n")
+		
 	# for each enzyme in enzyme list and for each sequence, run digest function
-	for enzyme in enzyme_list:
-		sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
-		# file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
-		output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
-		for sequence in SeqIO.parse(open(options.input), "fasta"):
-			digest(enzyme, sequence, output)
-		output.close()
+	def batch1():
+		for enzyme in batch_list[0]:
+			sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
+			# file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
+			output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+			for sequence in SeqIO.parse(open(options.input), "fasta"):
+				digest(enzyme, sequence, output)
+			output.close()
+
+	def batch2():
+		for enzyme in batch_list[1]:
+			sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
+			# file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
+			output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+			for sequence in SeqIO.parse(open(options.input), "fasta"):
+				digest(enzyme, sequence, output)
+			output.close()
+
+        def batch3():
+                for enzyme in batch_list[2]:
+                        sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
+                        # file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
+                        output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+                        for sequence in SeqIO.parse(open(options.input), "fasta"):
+                                digest(enzyme, sequence, output)
+                        output.close()
+
+        def batch4():
+                for enzyme in batch_list[3]:
+                        sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
+                        # file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
+                        output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+                        for sequence in SeqIO.parse(open(options.input), "fasta"):
+                                digest(enzyme, sequence, output)
+                        output.close()
+
+	p1 = Process(target=batch1)
+	p2 = Process(target=batch2)
+        p3 = Process(target=batch3)
+        p4 = Process(target=batch4)
+	p1.start()
+	p2.start()
+        p3.start()
+        p4.start()
+	p1.join()
+	p2.join()
+        p3.join()
+        p4.join()
 
 ### Run Main Program ###
 main()

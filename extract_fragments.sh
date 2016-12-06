@@ -87,7 +87,7 @@ RENZ=$(echo $RARE | rev | cut -d "_" -f 3 | rev)
 CENZ=$(echo $COMMON | rev | cut -d "_" -f 3 | rev)
 
 # Find closest common cut site to each rare cut site using the respective BED files and format output into BED output
-bedtools closest -g $GENOME.genomes -s -io -D a -t first -iu -fd -a $RARE -b $COMMON $RARE | \
+bedtools closest -s -io -D a -t first -iu -fd -a $RARE -b $COMMON $RARE | \
 grep -v "\-1" | awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
 awk '{if ($6 == "+") print $1 "\t" $2 "\t" $9 "\t" $4 "-" $11 "\t" $14 "\t" $6; \
 else print $1 "\t" $9 "\t" $2 "\t" $4 "-" $11 "\t" $14 "\t" $6}' - | \
