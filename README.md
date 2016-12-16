@@ -1,5 +1,5 @@
 # RADis
-RADis is a pipeline for performing in-silico RADseq experiments. It offers several advantages over other, existing software created for this purpose:
+RADis is a pipeline for performing *in-silico* RADseq experiments. It offers several advantages over other, existing software created for this purpose:
 
 1. It performs all digests based on an input file of restriction enzymes of interest, and does not need to be run manually when evaluating multiple combinations of enzymes.
 2. It exports information on the fragment coordinates and the fragment sequences in standard genomic data formats (BED and FASTA, respectively) that can be manipulated by existing powerful tools (e.g. BEDtools, etc.).
