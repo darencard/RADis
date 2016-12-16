@@ -88,14 +88,20 @@ CENZ=$(echo $COMMON | rev | cut -d "_" -f 3 | rev)
 
 # Find closest common cut site to each rare cut site using the respective BED files and format output into BED output
 cat \
-<(bedtools closest -io -D a -t first -fd -mdb all -filenames -g <(cat $GENOME | awk '$0 ~ ">" {print c; c=0;printf substr($1,2,300) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }') -a $RARE -b $RARE $COMMON | \
+<(bedtools closest -io -D ref -t first -fd -mdb all -filenames \
+-g <(cat $GENOME | awk '$0 ~ ">" {print c; c=0;printf substr($1,2,300) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }') \
+-a <(cat $RARE | awk '{ if ($6 == "+") print $0 }') -b <(cat $RARE | awk '{ if ($6 == "+") print $0 }') <(cat $COMMON | awk '{ if ($6 == "+") print $0 }') | \
 awk '{ if ($7 != ".") print $0 }' | \
+awk -v OFS="\t" 'function abs(value){ return (value <0? -value:value); }; { x=$14; y=abs(x); print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,y }' | \
 awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
-awk -v OFS="\t" '{ if ($4 != $11) print $1,$2,$9,$4"-"$11,$14,"+" }') \
-<(bedtools closest -io -D a -t first -fu -mdb all -filenames -g <(cat $GENOME | awk '$0 ~ ">" {print c; c=0;printf substr($1,2,300) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }') -a $RARE -b $RARE $COMMON | \
+awk -v OFS="\t" '{ if ($4 != $11) print $1,$2,$9,$4"-"$11,$14+1,"+" }') \
+<(bedtools closest -io -D ref -t first -fu -mdb all -filenames \
+-g <(cat $GENOME | awk '$0 ~ ">" {print c; c=0;printf substr($1,2,300) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }') \
+-a <(cat $RARE | awk '{ if ($6 == "+") print $0 }') -b <(cat $RARE | awk '{ if ($6 == "+") print $0 }') <(cat $COMMON | awk '{ if ($6 == "+") print $0 }') | \
 awk '{ if ($7 != ".") print $0 }' | \
+awk -v OFS="\t" 'function abs(value){ return (value <0? -value:value); }; { x=$14; y=abs(x); print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,y }' | \
 awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
-awk -v OFS="\t" '{ if ($4 != $11) print $1,$2,$9,$4"-"$11,$14,"-" }') | \
+awk -v OFS="\t" '{ if ($4 != $11) print $1,$9,$2,$4"-"$11,$14+1,"-" }') | \
 sort_lh3 -k1,1N -k2,2n \
 > $OUTPUT.bed
 

@@ -90,26 +90,27 @@ def parse_RE_list(list, input):
 ### 	Perform digest using given sequence and enzyme     ###
 ##############################################################
 
-def digest(enzyme, sequence, outfile):
+def digest(enzyme, sequence, outfile, count):
 	# search input sequence using enzyme sequence and return results to 'matches'
-	matches = SeqUtils.nt_search(str(sequence.seq), enzyme[1])
-	
+	matches = SeqUtils.nt_search(str(sequence.seq).upper(), enzyme[1])
+
 	# for each of the items in results 'matches' list from 2nd item on (first item is match string)
 	for match in matches[1:]:
 		# create line for match on query stand
-		line1 = sequence.id+"\t"+str(int(match)+int(enzyme[2]))+"\t"+str(int(match)+int(enzyme[2]))+"\t"+enzyme[0]+"\t.\t+\n"
-		# look for reverse complement - ignore... my thinking was muddled for a bit
-		#line2 = sequence.id+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+enzyme[0]+"\t.\t-\n"
+		line1 = sequence.id+"\t"+`int(match)+int(enzyme[2])`+"\t"+`int(match)+int(enzyme[2])`+"\t"+enzyme[0]+"\tcut-"+`count`+"\t+\n"
+		# look for reverse complement
+		line2 = sequence.id+"\t"+`int(match)+int(len(enzyme[1])-int(enzyme[2]))`+"\t"+`int(match)+int(len(enzyme[1])-int(enzyme[2]))`+"\t"+enzyme[0]+"\tcut-"+`count`+"\t-\n"
 
 		# if cut site is past halfway point in enzyme, we should output antisense cut first to keep output BED sorted
-		#if len(enzyme[1])/2 < int(enzyme[2]):
-			#outfile.write(line2+line1)
+		if len(enzyme[1])/2 < int(enzyme[2]):
+			outfile.write(line2+line1)
 		# if cut site is not past halfway point in enzyme, we can output in logical order
-		#else:
+		else:
 			# write both lines to ouput
-			#outfile.write(line1+line2)
+			outfile.write(line1+line2)
 		
-		outfile.write(line1)
+		count += 1
+	return count
 
 
 ##############################################################
@@ -144,8 +145,10 @@ def main():
 			sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
 			# file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
 			output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+			count1 = 0
 			for sequence in SeqIO.parse(open(options.input), "fasta"):
-				digest(enzyme, sequence, output)
+				new_count = digest(enzyme, sequence, output, count1)
+			count1 += new_count
 			output.close()
 
 	def batch2():
@@ -153,8 +156,9 @@ def main():
 			sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
 			# file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
 			output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+			count2 = 0
 			for sequence in SeqIO.parse(open(options.input), "fasta"):
-				digest(enzyme, sequence, output)
+				new_count = digest(enzyme, sequence, output, count2)
 			output.close()
 
         def batch3():
@@ -162,8 +166,9 @@ def main():
                         sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
                         # file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
                         output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
-                        for sequence in SeqIO.parse(open(options.input), "fasta"):
-                                digest(enzyme, sequence, output)
+                        count3 = 0
+			for sequence in SeqIO.parse(open(options.input), "fasta"):
+                                new_count = digest(enzyme, sequence, output, count3)
                         output.close()
 
         def batch4():
@@ -171,8 +176,9 @@ def main():
                         sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
                         # file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
                         output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+			count4 = 0
                         for sequence in SeqIO.parse(open(options.input), "fasta"):
-                                digest(enzyme, sequence, output)
+                                new_count = digest(enzyme, sequence, output, count4)
                         output.close()
 
 	p1 = Process(target=batch1)
