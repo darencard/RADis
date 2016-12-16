@@ -97,7 +97,7 @@ awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER
 awk -v OFS="\t" '{ if ($4 != $11) print $1,$2,$9,$4"-"$11,$14+1,"+" }') \
 <(bedtools closest -io -D ref -t first -fu -mdb all -filenames \
 -g <(cat $GENOME | awk '$0 ~ ">" {print c; c=0;printf substr($1,2,300) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }') \
--a <(cat $RARE | awk '{ if ($6 == "+") print $0 }') -b <(cat $RARE | awk '{ if ($6 == "+") print $0 }') <(cat $COMMON | awk '{ if ($6 == "+") print $0 }') | \
+-a <(cat $RARE | awk '{ if ($6 == "-") print $0 }') -b <(cat $RARE | awk '{ if ($6 == "-") print $0 }') <(cat $COMMON | awk '{ if ($6 == "-") print $0 }') | \
 awk '{ if ($7 != ".") print $0 }' | \
 awk -v OFS="\t" 'function abs(value){ return (value <0? -value:value); }; { x=$14; y=abs(x); print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,y }' | \
 awk '{if ($14 >= LOWER && $14 <= UPPER) print $0;}' LOWER="$LOWER" UPPER="$UPPER" - | \
