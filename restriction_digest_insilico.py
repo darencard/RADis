@@ -49,21 +49,21 @@ usage = usage_line
                         
 parser = optparse.OptionParser(usage=usage)
 parser.add_option("--input", 
-					action = "store", 
-					type = "string", 
-					dest = "input", 
-					help = "input genome/sequence (in fasta format)")
+	action = "store", 
+	type = "string", 
+	dest = "input", 
+	help = "input genome/sequence (in fasta format)")
 parser.add_option("--output", 
-					action = "store", 
-					type = "string", 
-					dest = "output", 
-					help = "output file name prefix for gzipped tab-delimited coordinate results",
-					default = "output")
+	action = "store", 
+	type = "string", 
+	dest = "output", 
+	help = "output file name prefix for gzipped tab-delimited coordinate results",
+	default = "output")
 parser.add_option("--enzymes", 
-					action = "store", 
-					type = "string", 
-					dest = "enzymes", 
-					help = "an input files with the restriction enzymes to use")
+	action = "store", 
+	type = "string", 
+	dest = "enzymes", 
+	help = "an input files with the restriction enzymes to use")
 
 options, args = parser.parse_args()
 
@@ -97,9 +97,9 @@ def digest(enzyme, sequence, outfile, count):
 	# for each of the items in results 'matches' list from 2nd item on (first item is match string)
 	for match in matches[1:]:
 		# create line for match on query stand
-		line1 = sequence.id+"\t"+`int(match)+int(enzyme[2])`+"\t"+`int(match)+int(enzyme[2])`+"\t"+enzyme[0]+"\tcut-"+`count`+"\t+\n"
+		line1 = sequence.id+"\t"+str(int(match)+int(enzyme[2]))+"\t"+str(int(match)+int(enzyme[2]))+"\t"+enzyme[0]+"\tcut-"+str(count)+"\t+\n"
 		# look for reverse complement
-		line2 = sequence.id+"\t"+`int(match)+int(len(enzyme[1])-int(enzyme[2]))`+"\t"+`int(match)+int(len(enzyme[1])-int(enzyme[2]))`+"\t"+enzyme[0]+"\tcut-"+`count`+"\t-\n"
+		line2 = sequence.id+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+str(int(match)+int(len(enzyme[1])-int(enzyme[2])))+"\t"+enzyme[0]+"\tcut-"+str(count)+"\t-\n"
 
 		# if cut site is past halfway point in enzyme, we should output antisense cut first to keep output BED sorted
 		if len(enzyme[1])/2 < int(enzyme[2]):
@@ -118,9 +118,9 @@ def digest(enzyme, sequence, outfile, count):
 ##############################################################
 
 def split_list(alist, wanted_parts=1):
-    length = len(alist)
-    return [ alist[i*length // wanted_parts: (i+1)*length // wanted_parts] 
-             for i in range(wanted_parts) ]
+	length = len(alist)
+	return [ alist[i*length // wanted_parts: (i+1)*length // wanted_parts] 
+		for i in range(wanted_parts) ]
 
 
 
@@ -161,38 +161,38 @@ def main():
 				new_count = digest(enzyme, sequence, output, count2)
 			output.close()
 
-        def batch3():
-                for enzyme in batch_list[2]:
-                        sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
+	def batch3():
+		for enzyme in batch_list[2]:
+			sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
                         # file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
-                        output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
-                        count3 = 0
+			output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+			count3 = 0
 			for sequence in SeqIO.parse(open(options.input), "fasta"):
-                                new_count = digest(enzyme, sequence, output, count3)
-                        output.close()
+				new_count = digest(enzyme, sequence, output, count3)
+			output.close()
 
-        def batch4():
-                for enzyme in batch_list[3]:
-                        sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
-                        # file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
-                        output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
+	def batch4():
+		for enzyme in batch_list[3]:
+			sys.stderr.write("Running in silico digest using "+enzyme[0]+" ("+enzyme[1]+").\n")
+			# file output format = <output_prefix>_<enzyme_name>_<enzyme_seq>_<enzyme_seq_length>.bed
+			output = open(options.output+"_"+enzyme[0]+"_"+enzyme[1]+"_"+str(len(enzyme[1]))+".bed", "w")
 			count4 = 0
-                        for sequence in SeqIO.parse(open(options.input), "fasta"):
-                                new_count = digest(enzyme, sequence, output, count4)
-                        output.close()
+			for sequence in SeqIO.parse(open(options.input), "fasta"):
+				new_count = digest(enzyme, sequence, output, count4)
+			output.close()
 
 	p1 = Process(target=batch1)
 	p2 = Process(target=batch2)
-        p3 = Process(target=batch3)
-        p4 = Process(target=batch4)
+	p3 = Process(target=batch3)
+	p4 = Process(target=batch4)
 	p1.start()
 	p2.start()
-        p3.start()
-        p4.start()
+	p3.start()
+	p4.start()
 	p1.join()
 	p2.join()
-        p3.join()
-        p4.join()
+	p3.join()
+	p4.join()
 
 ### Run Main Program ###
 main()
